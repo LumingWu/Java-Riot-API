@@ -1,5 +1,7 @@
 package main.java.riot.api.request;
 
+import main.java.riot.api.utility.ApiUtility;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -15,7 +17,7 @@ import java.util.Map;
 public class Requester {
 
     /* API KEY, empty when share */
-    private static final String key = "";
+    private static String key = "";
 
     /* Riot API URI Parts */
     private static final String https = "https://";
@@ -104,6 +106,7 @@ public class Requester {
                         + URLEncoder.encode(summoner_name, "UTF-8"));
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
+                return null;
             }
         }
         return null;
@@ -122,6 +125,7 @@ public class Requester {
                         + URLEncoder.encode(summoner_id, "UTF-8"));
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
+                return null;
             }
         }
         return null;
@@ -140,6 +144,7 @@ public class Requester {
                         + URLEncoder.encode(account_id, "UTF-8"));
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
+                return null;
             }
         }
         return null;
@@ -158,6 +163,7 @@ public class Requester {
                         + URLEncoder.encode(summoner_id, "UTF-8"));
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
+                return null;
             }
         }
         return null;
@@ -178,6 +184,7 @@ public class Requester {
                         + "/by-champion/" + URLEncoder.encode(champion_id, "UTF-8"));
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
+                return null;
             }
         }
         return null;
@@ -196,6 +203,7 @@ public class Requester {
                         + URLEncoder.encode(summoner_id, "UTF-8"));
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
+                return null;
             }
         }
         return null;
@@ -214,6 +222,7 @@ public class Requester {
                         + URLEncoder.encode(match_id, "UTF-8"));
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
+                return null;
             }
         }
         return null;
@@ -233,6 +242,7 @@ public class Requester {
                         + "/recent");
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
+                return null;
             }
         }
         return null;
@@ -280,15 +290,10 @@ public class Requester {
                 if(endTime != null){
                     query_parameters.addLast(uri += "endTime=" + URLEncoder.encode(endTime, "UTF-8"));
                 }
-                if(!query_parameters.isEmpty()){
-                    uri += query_parameters.pop();
-                    while(!query_parameters.isEmpty()){
-                        uri += "&" + query_parameters.pop();
-                    }
-                }
-                return httpRequest(uri);
+                return httpRequest(ApiUtility.concatQuery(uri, query_parameters));
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
+                return null;
             }
         }
         return null;
@@ -307,6 +312,7 @@ public class Requester {
                         + URLEncoder.encode(match_id, "UTF-8"));
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
+                return null;
             }
         }
         return null;
@@ -339,6 +345,7 @@ public class Requester {
                         + URLEncoder.encode(champion_id, "UTF-8"));
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
+                return null;
             }
         }
         return null;
@@ -357,6 +364,7 @@ public class Requester {
                         + URLEncoder.encode(queue, "UTF-8"));
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
+                return null;
             }
         }
         return null;
@@ -375,6 +383,7 @@ public class Requester {
                         + URLEncoder.encode(summoner_id, "UTF-8"));
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
+                return null;
             }
         }
         return null;
@@ -393,6 +402,7 @@ public class Requester {
                         + URLEncoder.encode(queue, "UTF-8"));
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
+                return null;
             }
         }
         return null;
@@ -411,6 +421,7 @@ public class Requester {
                         + URLEncoder.encode(summoner_id, "UTF-8"));
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
+                return null;
             }
         }
         return null;
@@ -429,6 +440,7 @@ public class Requester {
                         + URLEncoder.encode(summoner_id, "UTF-8"));
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
+                return null;
             }
         }
         return null;
@@ -447,9 +459,367 @@ public class Requester {
                         + URLEncoder.encode(summoner_id, "UTF-8"));
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
+                return null;
             }
         }
         return null;
+    }
+
+    /**
+     * Mutator method so that test and run can set the key too.
+     */
+    public static void setKey(String api_key){
+        key = api_key;
+    }
+
+    /**
+     * Static data requests that do no count toward rate limit.
+     */
+
+    public static String requestChampionsStatic(RequestPool.Regions region,
+                                                String locale,
+                                                String version,
+                                                String tags[],
+                                                boolean dataById){
+        try {
+            String uri = https + region.toString() + riot_api + "static-data/v3/champions?";
+            LinkedList<String> query_parameters = new LinkedList<String>();
+            if(locale != null){
+                query_parameters.addLast("locale=" + URLEncoder.encode(locale, "UTF-8"));
+            }
+            if(version != null){
+                query_parameters.addLast("version=" + URLEncoder.encode(version, "UTF-8"));
+            }
+            if(tags.length > 0){
+                for(String tag : tags){
+                    query_parameters.addLast("tags=" + URLEncoder.encode(tag, "UTF-8"));
+                }
+            }
+            if(dataById){
+                query_parameters.addLast("dataById=true");
+            }
+            else{
+                query_parameters.addLast("dataById=false");
+            }
+            return httpRequest(ApiUtility.concatQuery(uri, query_parameters));
+        } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+                return null;
+        }
+    }
+
+    public static String requestChampionByIdStatic(RequestPool.Regions region,
+                                                   String id,
+                                                   String locale,
+                                                   String version,
+                                                   String tags[]){
+        try {
+            String uri = https + region.toString() + riot_api + "static-data/v3/champions/" + URLEncoder.encode(id, "UTF-8") + "?";
+            LinkedList<String> query_parameters = new LinkedList<String>();
+            if(locale != null){
+                query_parameters.addLast("locale=" + URLEncoder.encode(locale, "UTF-8"));
+            }
+            if(version != null){
+                query_parameters.addLast("version=" + URLEncoder.encode(version, "UTF-8"));
+            }
+            if(tags.length > 0){
+                for(String tag : tags){
+                    query_parameters.addLast("tags=" + URLEncoder.encode(tag, "UTF-8"));
+                }
+            }
+            return httpRequest(ApiUtility.concatQuery(uri, query_parameters));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static String requestItemsStatic(RequestPool.Regions region,
+                                                   String locale,
+                                                   String version,
+                                                   String tags[]){
+        try {
+            String uri = https + region.toString() + riot_api + "static-data/v3/items?";
+            LinkedList<String> query_parameters = new LinkedList<String>();
+            if(locale != null){
+                query_parameters.addLast("locale=" + URLEncoder.encode(locale, "UTF-8"));
+            }
+            if(version != null){
+                query_parameters.addLast("version=" + URLEncoder.encode(version, "UTF-8"));
+            }
+            if(tags.length > 0){
+                for(String tag : tags){
+                    query_parameters.addLast("tags=" + URLEncoder.encode(tag, "UTF-8"));
+                }
+            }
+            return httpRequest(ApiUtility.concatQuery(uri, query_parameters));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static String requestItemByIdStatic(RequestPool.Regions region,
+                                            String item_id,
+                                            String locale,
+                                            String version,
+                                            String tags[]){
+        try {
+            String uri = https + region.toString() + riot_api + "static-data/v3/items/" + URLEncoder.encode(item_id, "UTF-8") + "?";
+            LinkedList<String> query_parameters = new LinkedList<String>();
+            if(locale != null){
+                query_parameters.addLast("locale=" + URLEncoder.encode(locale, "UTF-8"));
+            }
+            if(version != null){
+                query_parameters.addLast("version=" + URLEncoder.encode(version, "UTF-8"));
+            }
+            if(tags.length > 0){
+                for(String tag : tags){
+                    query_parameters.addLast("tags=" + URLEncoder.encode(tag, "UTF-8"));
+                }
+            }
+            return httpRequest(ApiUtility.concatQuery(uri, query_parameters));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static String requestLanguageStringsStatic(RequestPool.Regions region,
+                                                       String locale,
+                                                       String version){
+        try {
+            String uri = https + region.toString() + riot_api + "static-data/v3/language-strings?";
+            LinkedList<String> query_parameters = new LinkedList<String>();
+            if(locale != null){
+                query_parameters.addLast("locale=" + URLEncoder.encode(locale, "UTF-8"));
+            }
+            if(version != null){
+                query_parameters.addLast("version=" + URLEncoder.encode(version, "UTF-8"));
+            }
+            return httpRequest(ApiUtility.concatQuery(uri, query_parameters));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static String requestLanguagesStatic(RequestPool.Regions region){
+        String uri = https + region.toString() + riot_api + "static-data/v3/languages";
+        return httpRequest(uri);
+    }
+
+    public static String requestMapsStatic(RequestPool.Regions region,
+                                                      String locale,
+                                                      String version){
+        try {
+            String uri = https + region.toString() + riot_api + "static-data/v3/maps?";
+            LinkedList<String> query_parameters = new LinkedList<String>();
+            if(locale != null){
+                query_parameters.addLast("locale=" + URLEncoder.encode(locale, "UTF-8"));
+            }
+            if(version != null){
+                query_parameters.addLast("version=" + URLEncoder.encode(version, "UTF-8"));
+            }
+            return httpRequest(ApiUtility.concatQuery(uri, query_parameters));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static String requestMasteriesStatic(RequestPool.Regions region,
+                                               String locale,
+                                               String version,
+                                               String tags[]){
+        try {
+            String uri = https + region.toString() + riot_api + "static-data/v3/masteries?";
+            LinkedList<String> query_parameters = new LinkedList<String>();
+            if(locale != null){
+                query_parameters.addLast("locale=" + URLEncoder.encode(locale, "UTF-8"));
+            }
+            if(version != null){
+                query_parameters.addLast("version=" + URLEncoder.encode(version, "UTF-8"));
+            }
+            if(tags.length > 0){
+                for(String tag : tags){
+                    query_parameters.addLast("tags=" + URLEncoder.encode(tag, "UTF-8"));
+                }
+            }
+            return httpRequest(ApiUtility.concatQuery(uri, query_parameters));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static String requestMasteryByIdStatic(RequestPool.Regions region,
+                                                String id,
+                                                String locale,
+                                                String version,
+                                                String tags[]){
+        try {
+            String uri = https + region.toString() + riot_api + "static-data/v3/masteries/" + URLEncoder.encode(id, "UTF-8") + "?";
+            LinkedList<String> query_parameters = new LinkedList<String>();
+            if(locale != null){
+                query_parameters.addLast("locale=" + URLEncoder.encode(locale, "UTF-8"));
+            }
+            if(version != null){
+                query_parameters.addLast("version=" + URLEncoder.encode(version, "UTF-8"));
+            }
+            if(tags.length > 0){
+                for(String tag : tags){
+                    query_parameters.addLast("tags=" + URLEncoder.encode(tag, "UTF-8"));
+                }
+            }
+            return httpRequest(ApiUtility.concatQuery(uri, query_parameters));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static String requestProfileIconsStatic(RequestPool.Regions region,
+                                           String locale,
+                                           String version){
+        try {
+            String uri = https + region.toString() + riot_api + "static-data/v3/profile-icons?";
+            LinkedList<String> query_parameters = new LinkedList<String>();
+            if(locale != null){
+                query_parameters.addLast("locale=" + URLEncoder.encode(locale, "UTF-8"));
+            }
+            if(version != null){
+                query_parameters.addLast("version=" + URLEncoder.encode(version, "UTF-8"));
+            }
+            return httpRequest(ApiUtility.concatQuery(uri, query_parameters));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static String requestProfileIconsStatic(RequestPool.Regions region){
+        String uri = https + region.toString() + riot_api + "static-data/v3/realms";
+        return httpRequest(uri);
+    }
+
+    public static String requestRunesStatic(RequestPool.Regions region,
+                                                String locale,
+                                                String version,
+                                                String tags[]){
+        try {
+            String uri = https + region.toString() + riot_api + "static-data/v3/runes?";
+            LinkedList<String> query_parameters = new LinkedList<String>();
+            if(locale != null){
+                query_parameters.addLast("locale=" + URLEncoder.encode(locale, "UTF-8"));
+            }
+            if(version != null){
+                query_parameters.addLast("version=" + URLEncoder.encode(version, "UTF-8"));
+            }
+            if(tags.length > 0){
+                for(String tag : tags){
+                    query_parameters.addLast("tags=" + URLEncoder.encode(tag, "UTF-8"));
+                }
+            }
+            return httpRequest(ApiUtility.concatQuery(uri, query_parameters));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static String requestRuneByIdStatic(RequestPool.Regions region,
+                                            String id,
+                                            String locale,
+                                            String version,
+                                            String tags[]){
+        try {
+            String uri = https + region.toString() + riot_api + "static-data/v3/runes/" + URLEncoder.encode(id, "UTF-8") + "?";
+            LinkedList<String> query_parameters = new LinkedList<String>();
+            if(locale != null){
+                query_parameters.addLast("locale=" + URLEncoder.encode(locale, "UTF-8"));
+            }
+            if(version != null){
+                query_parameters.addLast("version=" + URLEncoder.encode(version, "UTF-8"));
+            }
+            if(tags.length > 0){
+                for(String tag : tags){
+                    query_parameters.addLast("tags=" + URLEncoder.encode(tag, "UTF-8"));
+                }
+            }
+            return httpRequest(ApiUtility.concatQuery(uri, query_parameters));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static String requestSummonerSpellsStatic(RequestPool.Regions region,
+                                                String locale,
+                                                String version,
+                                                String tags[],
+                                                boolean dataById){
+        try {
+            String uri = https + region.toString() + riot_api + "static-data/v3/summoner-spells?";
+            LinkedList<String> query_parameters = new LinkedList<String>();
+            if(locale != null){
+                query_parameters.addLast("locale=" + URLEncoder.encode(locale, "UTF-8"));
+            }
+            if(version != null){
+                query_parameters.addLast("version=" + URLEncoder.encode(version, "UTF-8"));
+            }
+            if(tags.length > 0){
+                for(String tag : tags){
+                    query_parameters.addLast("tags=" + URLEncoder.encode(tag, "UTF-8"));
+                }
+            }
+            if(dataById){
+                query_parameters.addLast("dataById=true");
+            }
+            else{
+                query_parameters.addLast("dataById=false");
+            }
+            return httpRequest(ApiUtility.concatQuery(uri, query_parameters));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static String requestSummonerSpellByIdStatic(RequestPool.Regions region,
+                                                     String id,
+                                                     String locale,
+                                                     String version,
+                                                     String tags[]){
+        try {
+            String uri = https + region.toString() + riot_api + "static-data/v3/summoner-spells/" + URLEncoder.encode(id, "UTF-8") + "?";
+            LinkedList<String> query_parameters = new LinkedList<String>();
+            if(locale != null){
+                query_parameters.addLast("locale=" + URLEncoder.encode(locale, "UTF-8"));
+            }
+            if(version != null){
+                query_parameters.addLast("version=" + URLEncoder.encode(version, "UTF-8"));
+            }
+            if(tags.length > 0){
+                for(String tag : tags){
+                    query_parameters.addLast("tags=" + URLEncoder.encode(tag, "UTF-8"));
+                }
+            }
+            return httpRequest(ApiUtility.concatQuery(uri, query_parameters));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static String requestVersionsStatic(RequestPool.Regions region){
+        String uri = https + region.toString() + riot_api + "static-data/v3/versions";
+        return httpRequest(uri);
+    }
+
+    public static String requestShardDataStatic(RequestPool.Regions region){
+        String uri = https + region.toString() + riot_api + "status/v3/shard-data";
+        return httpRequest(uri);
     }
 
 }

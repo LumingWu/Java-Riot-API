@@ -3,11 +3,25 @@ package main.java.riot.api.utility;
 import main.java.riot.api.request.RequestPool;
 
 import java.time.Instant;
+import java.util.LinkedList;
 
 public class ApiUtility {
 
     public ApiUtility(){
 
+    }
+
+    public static String concatQuery(String uri, LinkedList<String> query_parameters){
+        StringBuilder sb = new StringBuilder();
+        sb.append(uri);
+        if(!query_parameters.isEmpty()){
+            sb.append(query_parameters.pop());
+            while(!query_parameters.isEmpty()){
+                sb.append("&");
+                sb.append(query_parameters.pop());
+            }
+        }
+        return sb.toString();
     }
 
     public static RequestPool.Regions parseRegions(String region){
