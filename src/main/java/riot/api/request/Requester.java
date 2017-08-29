@@ -19,6 +19,8 @@ public class Requester {
     /* API KEY, empty when share */
     private static String key = "";
 
+    private
+
     /* Riot API URI Parts */
     private static final String https = "https://";
     private static final String riot_api = ".api.riotgames.com/lol/";

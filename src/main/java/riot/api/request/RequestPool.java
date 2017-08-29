@@ -6,12 +6,11 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.LinkedList;
 
-public class RequestPool {
+protected class RequestPool {
 
     /* Instances that keep the singleton of the requester and the record of the requests */
-    private static RequestPool instance;
-    private static ArrayList<ArrayList<LinkedList<Instant>>> application_queues;
-    private static ArrayList<ArrayList<ArrayList<LinkedList<Instant>>>> method_queues;
+    private static ArrayList<ArrayList<RateLimiter>> application_queues;
+    private static ArrayList<ArrayList<ArrayList<RateLimiter>>> method_queues;
 
     /* Rate limit constants subject to change */
     private static final long APP_RATE_PER_SECONDS = 10;
@@ -25,14 +24,12 @@ public class RequestPool {
     private static final long NANOSECOND_PER_SECOND = 1_000_000_000;
     private static final long SECOND_PER_MINUTE = 60;
 
-    /* static initializer to setup objects that need high level structure */
-    static {
-        instance = new RequestPool();
-        application_queues = new ArrayList<ArrayList<LinkedList<Instant>>>(Regions.values().length);
+    public RequestPool(){
+        application_queues = new ArrayList<ArrayList<RateLimiter>>(Regions.values().length);
         for(int i = 0; i < Regions.values().length; i++){
-            ArrayList<LinkedList<Instant>> queues = new ArrayList<LinkedList<Instant>>(2);
-            queues.add(new LinkedList<Instant>());
-            queues.add(new LinkedList<Instant>());
+            ArrayList<RateLimiter> queues = new ArrayList<RateLimiter>(2);
+            queues.add(new RateLimiter());
+            queues.add(new RateLimiter());
             application_queues.add(queues);
         }
         method_queues = new ArrayList<ArrayList<ArrayList<LinkedList<Instant>>>>(Regions.values().length);
@@ -46,10 +43,6 @@ public class RequestPool {
             }
             method_queues.add(method_lists);
         }
-    }
-
-    public RequestPool(){
-
     }
 
     /**
