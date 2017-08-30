@@ -19,7 +19,7 @@ public class Requester {
     /* API KEY, empty when share */
     private static String key = "";
 
-    private
+    private RequestPool request_pool = new RequestPool();
 
     /* Riot API URI Parts */
     private static final String https = "https://";
@@ -34,7 +34,7 @@ public class Requester {
      * @param uri
      * @return a JSON string if the Riot has good response, otherwise null and log errors.
      */
-    private static String httpRequest(String uri){
+    private String httpRequest(String uri){
         try {
             URL url = new URL(uri);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -81,8 +81,6 @@ public class Requester {
                 if(responsecode == 429) {
                     /* Stop server, there is a major error in the code */
 
-                    /* Print the current queue status*/
-                    RequestPool.printQueues();
                 }
             }
         } catch (MalformedURLException e) {
@@ -101,8 +99,8 @@ public class Requester {
      * @param summoner_name
      * @return the return json if the request was success, otherwise null.
      */
-    public static String requestSummonerByName(RequestPool.Regions region, String summoner_name){
-        if(RequestPool.queueRequest(region, RequestPool.Methods.summonerByName)){
+    public String requestSummonerByName(RequestPool.Regions region, String summoner_name){
+        if(request_pool.queueRequest(region, RequestPool.Methods.summonerByName)){
             try {
                 return httpRequest(https + region.toString() + riot_api + "summoner/v3/summoners/by-name/"
                         + URLEncoder.encode(summoner_name, "UTF-8"));
@@ -120,8 +118,8 @@ public class Requester {
      * @param summoner_id
      * @return the return json if the request was success, otherwise null.
      */
-    public static String requestSummonerById(RequestPool.Regions region, String summoner_id){
-        if(RequestPool.queueRequest(region, RequestPool.Methods.summonerById)){
+    public String requestSummonerById(RequestPool.Regions region, String summoner_id){
+        if(request_pool.queueRequest(region, RequestPool.Methods.summonerById)){
             try {
                 return httpRequest(https + region.toString() + riot_api + "summoner/v3/summoners/"
                         + URLEncoder.encode(summoner_id, "UTF-8"));
@@ -139,8 +137,8 @@ public class Requester {
      * @param account_id
      * @return the return json if the request was success, otherwise null.
      */
-    public static String requestSummonerByAccountId(RequestPool.Regions region, String account_id){
-        if(RequestPool.queueRequest(region, RequestPool.Methods.summonerById)){
+    public String requestSummonerByAccountId(RequestPool.Regions region, String account_id){
+        if(request_pool.queueRequest(region, RequestPool.Methods.summonerById)){
             try {
                 return httpRequest(https + region.toString() + riot_api + "summoner/v3/summoners/by-account/"
                         + URLEncoder.encode(account_id, "UTF-8"));
@@ -158,8 +156,8 @@ public class Requester {
      * @param summoner_id
      * @return the return json if the request was success, otherwise null.
      */
-    public static String requestChampionMasteriesBySummonerId(RequestPool.Regions region, String summoner_id){
-        if(RequestPool.queueRequest(region, RequestPool.Methods.championMasteriesBySummonerId)){
+    public String requestChampionMasteriesBySummonerId(RequestPool.Regions region, String summoner_id){
+        if(request_pool.queueRequest(region, RequestPool.Methods.championMasteriesBySummonerId)){
             try {
                 return httpRequest(https + region.toString() + riot_api + "champion-mastery/v3/champion-masteries/by-summoner/"
                         + URLEncoder.encode(summoner_id, "UTF-8"));
@@ -178,8 +176,8 @@ public class Requester {
      * @param champion_id
      * @return the return json if the request was success, otherwise null.
      */
-    public static String requestChampionMasteryBySummonerIdChampionId(RequestPool.Regions region, String summoner_id, String champion_id){
-        if(RequestPool.queueRequest(region, RequestPool.Methods.championMasteryBySummonerIdChampionId)){
+    public String requestChampionMasteryBySummonerIdChampionId(RequestPool.Regions region, String summoner_id, String champion_id){
+        if(request_pool.queueRequest(region, RequestPool.Methods.championMasteryBySummonerIdChampionId)){
             try {
                 return httpRequest(https + region.toString() + riot_api + "champion-mastery/v3/champion-masteries/by-summoner/"
                         + URLEncoder.encode(summoner_id, "UTF-8")
@@ -198,8 +196,8 @@ public class Requester {
      * @param summoner_id
      * @return the return json if the request was success, otherwise null.
      */
-    public static String requestChampionMasteryScoresBySummonerId(RequestPool.Regions region, String summoner_id){
-        if(RequestPool.queueRequest(region, RequestPool.Methods.championMasteryScoresBySummonerId)){
+    public String requestChampionMasteryScoresBySummonerId(RequestPool.Regions region, String summoner_id){
+        if(request_pool.queueRequest(region, RequestPool.Methods.championMasteryScoresBySummonerId)){
             try {
                 return httpRequest(https + region.toString() + riot_api + "champion-mastery/v3/scores/by-summoner/"
                         + URLEncoder.encode(summoner_id, "UTF-8"));
@@ -217,8 +215,8 @@ public class Requester {
      * @param match_id
      * @return the return json if the request was success, otherwise null.
      */
-    public static String requestMatchById(RequestPool.Regions region, String match_id){
-        if(RequestPool.queueRequest(region, RequestPool.Methods.matchById)){
+    public String requestMatchById(RequestPool.Regions region, String match_id){
+        if(request_pool.queueRequest(region, RequestPool.Methods.matchById)){
             try {
                 return httpRequest(https + region.toString() + riot_api + "match/v3/matches/"
                         + URLEncoder.encode(match_id, "UTF-8"));
@@ -236,8 +234,8 @@ public class Requester {
      * @param account_id
      * @return the return json if the request was success, otherwise null.
      */
-    public static String requestMatchesByAccountId(RequestPool.Regions region, String account_id){
-        if(RequestPool.queueRequest(region, RequestPool.Methods.matchesByAccountId)){
+    public String requestMatchesByAccountId(RequestPool.Regions region, String account_id){
+        if(request_pool.queueRequest(region, RequestPool.Methods.matchesByAccountId)){
             try {
                 return httpRequest(https + region.toString() + riot_api + "match/v3/matchlists/by-account/"
                         + URLEncoder.encode(account_id, "UTF-8")
@@ -256,7 +254,7 @@ public class Requester {
      * @param account_id
      * @return the return json if the request was success, otherwise null.
      */
-    public static String requestMatchesByAccountId(RequestPool.Regions region,
+    public String requestMatchesByAccountId(RequestPool.Regions region,
                                                    String account_id,
                                                    String queue,
                                                    String beginTime,
@@ -265,7 +263,7 @@ public class Requester {
                                                    String champion,
                                                    String beginIndex,
                                                    String endTime){
-        if(RequestPool.queueRequest(region, RequestPool.Methods.matchesByAccountIdFilter)){
+        if(request_pool.queueRequest(region, RequestPool.Methods.matchesByAccountIdFilter)){
             try {
                 String uri = https + region.toString() + riot_api + "match/v3/matchlists/by-account/"
                         + URLEncoder.encode(account_id, "UTF-8")
@@ -307,8 +305,8 @@ public class Requester {
      * @param match_id
      * @return the return json if the request was success, otherwise null.
      */
-    public static String requestMatchTimelinesByMatchId(RequestPool.Regions region, String match_id){
-        if(RequestPool.queueRequest(region, RequestPool.Methods.matchTimelinesByMatchId)){
+    public String requestMatchTimelinesByMatchId(RequestPool.Regions region, String match_id){
+        if(request_pool.queueRequest(region, RequestPool.Methods.matchTimelinesByMatchId)){
             try {
                 return httpRequest(https + region.toString() + riot_api + "match/v3/timelines/by-match/"
                         + URLEncoder.encode(match_id, "UTF-8"));
@@ -326,8 +324,8 @@ public class Requester {
      * @param free_to_play
      * @return the return json if the request was success, otherwise null.
      */
-    public static String requestChampions(RequestPool.Regions region, boolean free_to_play){
-        if(RequestPool.queueRequest(region, RequestPool.Methods.champions)){
+    public String requestChampions(RequestPool.Regions region, boolean free_to_play){
+        if(request_pool.queueRequest(region, RequestPool.Methods.champions)){
             String uri = https + region.toString() + riot_api + "platform/v3/champions?freeToPlay=" + (free_to_play? "true" : "false");
             return httpRequest(uri);
         }
@@ -340,8 +338,8 @@ public class Requester {
      * @param champion_id
      * @return the return json if the request was success, otherwise null.
      */
-    public static String requestChampionById(RequestPool.Regions region, String champion_id){
-        if(RequestPool.queueRequest(region, RequestPool.Methods.championById)){
+    public String requestChampionById(RequestPool.Regions region, String champion_id){
+        if(request_pool.queueRequest(region, RequestPool.Methods.championById)){
             try {
                 return httpRequest(https + region.toString() + riot_api + "platform/v3/champions/"
                         + URLEncoder.encode(champion_id, "UTF-8"));
@@ -359,8 +357,8 @@ public class Requester {
      * @param queue
      * @return the return json if the request was success, otherwise null.
      */
-    public static String requestChallengerLeagueByQueue(RequestPool.Regions region, String queue){
-        if(RequestPool.queueRequest(region, RequestPool.Methods.challengerLeagueByQueue)){
+    public String requestChallengerLeagueByQueue(RequestPool.Regions region, String queue){
+        if(request_pool.queueRequest(region, RequestPool.Methods.challengerLeagueByQueue)){
             try {
                 return httpRequest(https + region.toString() + riot_api + "league/v3/challengerleagues/by-queue/"
                         + URLEncoder.encode(queue, "UTF-8"));
@@ -378,8 +376,8 @@ public class Requester {
      * @param summoner_id
      * @return the return json if the request was success, otherwise null.
      */
-    public static String requestLeagueBySummonerId(RequestPool.Regions region, String summoner_id){
-        if(RequestPool.queueRequest(region, RequestPool.Methods.leagueBySummonerId)){
+    public String requestLeagueBySummonerId(RequestPool.Regions region, String summoner_id){
+        if(request_pool.queueRequest(region, RequestPool.Methods.leagueBySummonerId)){
             try {
                 return httpRequest(https + region.toString() + riot_api + "league/v3/leagues/by-summoner/"
                         + URLEncoder.encode(summoner_id, "UTF-8"));
@@ -397,8 +395,8 @@ public class Requester {
      * @param queue
      * @return the return json if the request was success, otherwise null.
      */
-    public static String requestMasterLeagueByQueue(RequestPool.Regions region, String queue){
-        if(RequestPool.queueRequest(region, RequestPool.Methods.masterLeagueByQueue)){
+    public String requestMasterLeagueByQueue(RequestPool.Regions region, String queue){
+        if(request_pool.queueRequest(region, RequestPool.Methods.masterLeagueByQueue)){
             try {
                 return httpRequest(https + region.toString() + riot_api + "league/v3/masterleagues/by-queue/"
                         + URLEncoder.encode(queue, "UTF-8"));
@@ -416,8 +414,8 @@ public class Requester {
      * @param summoner_id
      * @return the return json if the request was success, otherwise null.
      */
-    public static String requestPositionBySummonerId(RequestPool.Regions region, String summoner_id){
-        if(RequestPool.queueRequest(region, RequestPool.Methods.positionBySummonerId)){
+    public String requestPositionBySummonerId(RequestPool.Regions region, String summoner_id){
+        if(request_pool.queueRequest(region, RequestPool.Methods.positionBySummonerId)){
             try {
                 return httpRequest(https + region.toString() + riot_api + "league/v3/positions/by-summoner/"
                         + URLEncoder.encode(summoner_id, "UTF-8"));
@@ -435,8 +433,8 @@ public class Requester {
      * @param summoner_id
      * @return the return json if the request was success, otherwise null.
      */
-    public static String requestMasteriesBySummonerId(RequestPool.Regions region, String summoner_id){
-        if(RequestPool.queueRequest(region, RequestPool.Methods.masteriesBySummonerId)){
+    public String requestMasteriesBySummonerId(RequestPool.Regions region, String summoner_id){
+        if(request_pool.queueRequest(region, RequestPool.Methods.masteriesBySummonerId)){
             try {
                 return httpRequest(https + region.toString() + riot_api + "platform/v3/masteries/by-summoner/"
                         + URLEncoder.encode(summoner_id, "UTF-8"));
@@ -454,8 +452,8 @@ public class Requester {
      * @param summoner_id
      * @return the return json if the request was success, otherwise null.
      */
-    public static String requestRunesBySummonerId(RequestPool.Regions region, String summoner_id){
-        if(RequestPool.queueRequest(region, RequestPool.Methods.runesBySummonerId)){
+    public String requestRunesBySummonerId(RequestPool.Regions region, String summoner_id){
+        if(request_pool.queueRequest(region, RequestPool.Methods.runesBySummonerId)){
             try {
                 return httpRequest(https + region.toString() + riot_api + "platform/v3/runes/by-summoner/"
                         + URLEncoder.encode(summoner_id, "UTF-8"));
@@ -478,7 +476,7 @@ public class Requester {
      * Static data requests that do no count toward rate limit.
      */
 
-    public static String requestChampionsStatic(RequestPool.Regions region,
+    public String requestChampionsStatic(RequestPool.Regions region,
                                                 String locale,
                                                 String version,
                                                 String tags[],
@@ -510,7 +508,7 @@ public class Requester {
         }
     }
 
-    public static String requestChampionByIdStatic(RequestPool.Regions region,
+    public String requestChampionByIdStatic(RequestPool.Regions region,
                                                    String id,
                                                    String locale,
                                                    String version,
@@ -536,7 +534,7 @@ public class Requester {
         }
     }
 
-    public static String requestItemsStatic(RequestPool.Regions region,
+    public String requestItemsStatic(RequestPool.Regions region,
                                                    String locale,
                                                    String version,
                                                    String tags[]){
@@ -561,7 +559,7 @@ public class Requester {
         }
     }
 
-    public static String requestItemByIdStatic(RequestPool.Regions region,
+    public String requestItemByIdStatic(RequestPool.Regions region,
                                             String item_id,
                                             String locale,
                                             String version,
@@ -587,7 +585,7 @@ public class Requester {
         }
     }
 
-    public static String requestLanguageStringsStatic(RequestPool.Regions region,
+    public String requestLanguageStringsStatic(RequestPool.Regions region,
                                                        String locale,
                                                        String version){
         try {
@@ -606,12 +604,12 @@ public class Requester {
         }
     }
 
-    public static String requestLanguagesStatic(RequestPool.Regions region){
+    public String requestLanguagesStatic(RequestPool.Regions region){
         String uri = https + region.toString() + riot_api + "static-data/v3/languages";
         return httpRequest(uri);
     }
 
-    public static String requestMapsStatic(RequestPool.Regions region,
+    public String requestMapsStatic(RequestPool.Regions region,
                                                       String locale,
                                                       String version){
         try {
@@ -630,7 +628,7 @@ public class Requester {
         }
     }
 
-    public static String requestMasteriesStatic(RequestPool.Regions region,
+    public String requestMasteriesStatic(RequestPool.Regions region,
                                                String locale,
                                                String version,
                                                String tags[]){
@@ -655,7 +653,7 @@ public class Requester {
         }
     }
 
-    public static String requestMasteryByIdStatic(RequestPool.Regions region,
+    public String requestMasteryByIdStatic(RequestPool.Regions region,
                                                 String id,
                                                 String locale,
                                                 String version,
@@ -681,7 +679,7 @@ public class Requester {
         }
     }
 
-    public static String requestProfileIconsStatic(RequestPool.Regions region,
+    public String requestProfileIconsStatic(RequestPool.Regions region,
                                            String locale,
                                            String version){
         try {
@@ -700,12 +698,12 @@ public class Requester {
         }
     }
 
-    public static String requestProfileIconsStatic(RequestPool.Regions region){
+    public String requestProfileIconsStatic(RequestPool.Regions region){
         String uri = https + region.toString() + riot_api + "static-data/v3/realms";
         return httpRequest(uri);
     }
 
-    public static String requestRunesStatic(RequestPool.Regions region,
+    public String requestRunesStatic(RequestPool.Regions region,
                                                 String locale,
                                                 String version,
                                                 String tags[]){
@@ -730,7 +728,7 @@ public class Requester {
         }
     }
 
-    public static String requestRuneByIdStatic(RequestPool.Regions region,
+    public String requestRuneByIdStatic(RequestPool.Regions region,
                                             String id,
                                             String locale,
                                             String version,
@@ -756,7 +754,7 @@ public class Requester {
         }
     }
 
-    public static String requestSummonerSpellsStatic(RequestPool.Regions region,
+    public String requestSummonerSpellsStatic(RequestPool.Regions region,
                                                 String locale,
                                                 String version,
                                                 String tags[],
@@ -788,7 +786,7 @@ public class Requester {
         }
     }
 
-    public static String requestSummonerSpellByIdStatic(RequestPool.Regions region,
+    public String requestSummonerSpellByIdStatic(RequestPool.Regions region,
                                                      String id,
                                                      String locale,
                                                      String version,
@@ -814,12 +812,12 @@ public class Requester {
         }
     }
 
-    public static String requestVersionsStatic(RequestPool.Regions region){
+    public String requestVersionsStatic(RequestPool.Regions region){
         String uri = https + region.toString() + riot_api + "static-data/v3/versions";
         return httpRequest(uri);
     }
 
-    public static String requestShardDataStatic(RequestPool.Regions region){
+    public String requestShardDataStatic(RequestPool.Regions region){
         String uri = https + region.toString() + riot_api + "status/v3/shard-data";
         return httpRequest(uri);
     }

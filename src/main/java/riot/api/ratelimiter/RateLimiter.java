@@ -1,4 +1,4 @@
-package main.java.ratelimiter;
+package main.java.riot.api.ratelimiter;
 
 
 import java.time.Clock;
@@ -47,6 +47,12 @@ public class RateLimiter{
             return true;
         }
         return false;
+    }
+
+    public synchronized void incrementToken(){
+        if(token < max_token){
+            token += 1;
+        }
     }
 
     public int getToken(){

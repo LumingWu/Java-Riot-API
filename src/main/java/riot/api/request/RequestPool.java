@@ -1,44 +1,42 @@
 package main.java.riot.api.request;
 
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.LinkedList;
+import main.java.riot.api.ratelimiter.RateLimiter;
 
-protected class RequestPool {
+import java.util.ArrayList;
+
+public class RequestPool {
 
     /* Instances that keep the singleton of the requester and the record of the requests */
-    private static ArrayList<ArrayList<RateLimiter>> application_queues;
-    private static ArrayList<ArrayList<ArrayList<RateLimiter>>> method_queues;
+    private ArrayList<ArrayList<RateLimiter>> application_queues;
+    private ArrayList<ArrayList<ArrayList<RateLimiter>>> method_queues;
 
     /* Rate limit constants subject to change */
-    private static final long APP_RATE_PER_SECONDS = 10;
-    private static final long METHOD_RATE_PER_SECONDS = 10;
-    private static final long SECONDS = 10;
-    private static final long APP_RATE_PER_MINUTES = 500;
-    private static final long METHOD_RATE_PER_MINUTES = 500;
-    private static final long MINUTES = 10;
+    private static final int APP_RATE_PER_SECONDS = 10;
+    private static final int METHOD_RATE_PER_SECONDS = 10;
+    private static final int SECONDS = 10;
+    private static final int APP_RATE_PER_MINUTES = 500;
+    private static final int METHOD_RATE_PER_MINUTES = 500;
+    private static final int MINUTES = 10;
 
     /* Calculation constants */
-    private static final long NANOSECOND_PER_SECOND = 1_000_000_000;
-    private static final long SECOND_PER_MINUTE = 60;
+    private static final int NANOSECOND_PER_SECOND = 1_000_000_000;
+    private static final int SECOND_PER_MINUTE = 60;
 
-    public RequestPool(){
+    protected RequestPool(){
         application_queues = new ArrayList<ArrayList<RateLimiter>>(Regions.values().length);
         for(int i = 0; i < Regions.values().length; i++){
             ArrayList<RateLimiter> queues = new ArrayList<RateLimiter>(2);
-            queues.add(new RateLimiter());
-            queues.add(new RateLimiter());
+            queues.add(new RateLimiter(APP_RATE_PER_SECONDS, APP_RATE_PER_SECONDS, SECONDS));
+            queues.add(new RateLimiter(APP_RATE_PER_MINUTES, APP_RATE_PER_MINUTES, MINUTES * SECOND_PER_MINUTE));
             application_queues.add(queues);
         }
-        method_queues = new ArrayList<ArrayList<ArrayList<LinkedList<Instant>>>>(Regions.values().length);
+        method_queues = new ArrayList<ArrayList<ArrayList<RateLimiter>>>(Regions.values().length);
         for(int i = 0; i < Regions.values().length; i++){
-            ArrayList<ArrayList<LinkedList<Instant>>> method_lists = new ArrayList<ArrayList<LinkedList<Instant>>>(Methods.values().length);
+            ArrayList<ArrayList<RateLimiter>> method_lists = new ArrayList<ArrayList<RateLimiter>>(Methods.values().length);
             for(int j = 0; j < Methods.values().length; j++){
-                ArrayList<LinkedList<Instant>> queues = new ArrayList<LinkedList<Instant>>(2);
-                queues.add(new LinkedList<Instant>());
-                queues.add(new LinkedList<Instant>());
+                ArrayList<RateLimiter> queues = new ArrayList<RateLimiter>(2);
+                queues.add(new RateLimiter(METHOD_RATE_PER_SECONDS, METHOD_RATE_PER_SECONDS, SECONDS));
+                queues.add(new RateLimiter(METHOD_RATE_PER_MINUTES, METHOD_RATE_PER_MINUTES, MINUTES * SECOND_PER_MINUTE));
                 method_lists.add(queues);
             }
             method_queues.add(method_lists);
@@ -52,70 +50,24 @@ protected class RequestPool {
      * @param method - the method
      * @return true if a request can be made, false otherwise.
      */
-    public static synchronized boolean queueRequest(Regions region, Methods method){
-        LinkedList<Instant> app_second_queue = application_queues.get(region.ordinal()).get(0);
-        LinkedList<Instant> app_minute_queue = application_queues.get(region.ordinal()).get(1);
-        LinkedList<Instant> method_second_queue = method_queues.get(region.ordinal()).get(method.ordinal()).get(0);
-        LinkedList<Instant> method_minute_queue = method_queues.get(region.ordinal()).get(method.ordinal()).get(1);
-        Instant timestamp = Instant.now();
-        long timestamp_in_nano = timestamp.getEpochSecond() * NANOSECOND_PER_SECOND + timestamp.getNano();
-        /* If a queue is adding an item that will hit the limit, check if the time difference is going to be too small */
-        long app_difference_in_seconds;
-        long app_difference_in_minutes;
-        long method_difference_in_seconds;
-        long method_difference_in_minutes;
-        if((app_second_queue.size() == APP_RATE_PER_SECONDS - 1
-                && (app_difference_in_seconds = (timestamp_in_nano - app_second_queue.getFirst().getEpochSecond() * NANOSECOND_PER_SECOND - app_second_queue.getFirst().getNano())
-                    / NANOSECOND_PER_SECOND) <= SECONDS)
-                || (app_minute_queue.size() == APP_RATE_PER_MINUTES - 1
-                && (app_difference_in_minutes = (timestamp_in_nano - app_minute_queue.getFirst().getEpochSecond() * NANOSECOND_PER_SECOND - app_minute_queue.getFirst().getNano())
-                    / NANOSECOND_PER_SECOND / SECOND_PER_MINUTE) <= MINUTES)
-                || (method_second_queue.size() == METHOD_RATE_PER_SECONDS - 1
-                && (method_difference_in_seconds = (timestamp_in_nano - method_second_queue.getFirst().getEpochSecond() * NANOSECOND_PER_SECOND - method_second_queue.getFirst().getNano())
-                    / NANOSECOND_PER_SECOND) <= SECONDS)
-                || (method_minute_queue.size() == METHOD_RATE_PER_MINUTES - 1
-                && (method_difference_in_minutes = (timestamp_in_nano - method_minute_queue.getFirst().getEpochSecond() * NANOSECOND_PER_SECOND - method_minute_queue.getFirst().getNano())
-                    / NANOSECOND_PER_SECOND / SECOND_PER_MINUTE) <= MINUTES)){
-            return false;
-        }
-        app_second_queue.addLast(timestamp);
-        app_minute_queue.addLast(timestamp);
-        method_second_queue.addLast(timestamp);
-        method_minute_queue.addLast(timestamp);
-        /* Pop first item of queues if it is no longer useful for comparison */
-        if(app_second_queue.size() == APP_RATE_PER_SECONDS){
-            app_second_queue.removeFirst();
-        }
-        if(app_minute_queue.size() == APP_RATE_PER_MINUTES){
-            app_minute_queue.removeFirst();
-        }
-        if(method_second_queue.size() == METHOD_RATE_PER_SECONDS){
-            method_second_queue.removeFirst();
-        }
-        if(method_minute_queue.size() == METHOD_RATE_PER_MINUTES){
-            method_minute_queue.removeFirst();
-        }
-        return true;
-    }
-
-    /**
-     * This function simply prints the items in all the queues.
-     */
-    public static void printQueues(){
-        System.out.println("       Application Queue:");
-        for(int i = 0; i < application_queues.size(); i++){
-            System.out.println("              " + RequestPool.Regions.values()[i].toString());
-            System.out.println("                     Second : " + application_queues.get(i).get(0).toString());
-            System.out.println("                     Minute : " + application_queues.get(i).get(1).toString());
-        }
-        System.out.println("       Method Queue:");
-        for(int i = 0; i < method_queues.size(); i++){
-            for(int j = 0; j < method_queues.get(i).size(); j++){
-                System.out.println("              " + RequestPool.Regions.values()[i].toString() + ", " + RequestPool.Methods.values()[j].toString());
-                System.out.println("                     Second : " + method_queues.get(i).get(j).get(0).toString());
-                System.out.println("                     Minute : " + method_queues.get(i).get(j).get(1).toString());
+    public synchronized boolean queueRequest(Regions region, Methods method){
+        RateLimiter app_second_queue = application_queues.get(region.ordinal()).get(0);
+        RateLimiter app_minute_queue = application_queues.get(region.ordinal()).get(1);
+        RateLimiter method_second_queue = method_queues.get(region.ordinal()).get(method.ordinal()).get(0);
+        RateLimiter method_minute_queue = method_queues.get(region.ordinal()).get(method.ordinal()).get(1);
+        if(app_second_queue.requestRate()){
+            if(app_minute_queue.requestRate()){
+                if (method_second_queue.requestRate()){
+                    if (method_minute_queue.requestRate()){
+                        return true;
+                    }
+                    method_second_queue.incrementToken();
+                }
+                app_minute_queue.incrementToken();
             }
+            app_second_queue.incrementToken();
         }
+        return false;
     }
 
     /**
@@ -144,14 +96,6 @@ protected class RequestPool {
 
     public static long getMinutes(){
         return MINUTES;
-    }
-
-    public static ArrayList<ArrayList<LinkedList<Instant>>> getApplication_queues(){
-        return application_queues;
-    }
-
-    public static ArrayList<ArrayList<ArrayList<LinkedList<Instant>>>> getMethod_queues(){
-        return method_queues;
     }
 
     /* Enum that helps maintaining the size of queues and index */
